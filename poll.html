@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Poll</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    text-align:center;
+    padding-top:100px;
+}
+
+button{
+    padding:12px 24px;
+    font-size:18px;
+    margin:10px;
+    cursor:pointer;
+}
+
+.popup{
+    display:none;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    background:white;
+    border:2px solid black;
+    padding:20px;
+    z-index:1000;
+}
+</style>
+</head>
+<body>
+
+<h1>What is your favorite ship?</h1>
+
+<button onclick="vote('yes')">Yes</button>
+<button onclick="vote('no')">No</button>
+
+<div id="popup" class="popup">
+    <p>Thank you for voting.</p>
+    <button onclick="window.location.href='nextpage.html'">
+        Continue
+    </button>
+</div>
+
+<script>
+
+async function vote(choice){
+
+    if(localStorage.getItem("alreadyVoted")){
+        alert("You have already voted.");
+        return;
+    }
+
+    try{
+
+        await fetch(
+            "https://YOUR-WORKER.workers.dev/vote",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify({
+                    vote:choice
+                })
+            }
+        );
+
+        localStorage.setItem("alreadyVoted","true");
+
+        document.getElementById("popup").style.display="block";
+
+    }catch(err){
+        alert("Error submitting vote.");
+    }
+}
+
+</script>
+
+</body>
+</html>
