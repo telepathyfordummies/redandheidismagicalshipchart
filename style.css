@@ -1,0 +1,62 @@
+body{
+    font-family:Arial,sans-serif;
+    max-width:900px;
+    margin:auto;
+    padding:30px;
+    text-align:center;
+}
+
+.poll-grid{
+    display:grid;
+    grid-template-columns:
+        repeat(3,1fr);
+    gap:15px;
+    margin-top:30px;
+}
+
+.poll-grid button{
+    padding:18px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+.popup{
+    display:none;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:
+        translate(-50%,-50%);
+    background:white;
+    border:2px solid black;
+    padding:25px;
+}
+
+#leader{
+    font-size:28px;
+    font-weight:bold;
+    margin-bottom:30px;
+}
+
+.result-row{
+    margin-bottom:20px;
+}
+
+.result-label{
+    text-align:left;
+    margin-bottom:5px;
+    font-weight:bold;
+}
+
+.bar-container{
+    width:100%;
+    background:#dddddd;
+    border-radius:20px;
+    overflow:hidden;
+    height:28px;
+}
+
+.bar{
+    height:100%;
+    background:#4caf50;
+}
