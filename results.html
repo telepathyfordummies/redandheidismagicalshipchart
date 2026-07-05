@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Results</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>Poll Results</h1>
+
+<div id="leader"></div>
+
+<div id="results"></div>
+
+<script>
+
+const API_URL =
+"https://YOUR-WORKER.workers.dev";
+
+async function loadResults(){
+
+    const response =
+        await fetch(
+            `${API_URL}/results`
+        );
+
+    const data =
+        await response.json();
+
+    const entries =
+        Object.entries(data);
+
+    const totalVotes =
+        entries.reduce(
+            (sum,[,votes]) =>
+                sum + votes,
+            0
+        );
+
+    entries.sort(
+        (a,b) => b[1]-a[1]
+    );
+
+    if(entries.length){
+
+        const leaderName =
+            entries[0][0];
+
+        const leaderVotes =
+            entries[0][1];
+
+        document.getElementById(
+            "leader"
+        ).innerHTML =
+        `🏆 Current Leader:
+        ${leaderName}
+        (${(
+            leaderVotes /
+            totalVotes * 100
+        ).toFixed(1)}%)`;
+
+    }
+
+    const container =
+        document.getElementById(
+            "results"
+        );
+
+    container.innerHTML = "";
+
+    const topVotes =
+        entries.length
+        ? entries[0][1]
+        : 1;
+
+    entries.forEach(
+        ([name,votes]) => {
+
+        const percent =
+            totalVotes
+            ? (
+                votes /
+                totalVotes *
+                100
+            )
+            : 0;
+
+        const width =
+            topVotes
+            ? (
+                votes /
+                topVotes *
+                100
+            )
+            : 0;
+
+        container.innerHTML += `
+            <div class="result-row">
+
+                <div class="result-label">
+                    ${name}
+                    (${percent.toFixed(1)}%)
+                </div>
+
+                <div class="bar-container">
+                    <div
+                        class="bar"
+                        style="width:${width}%"
+                    ></div>
+                </div>
+
+            </div>
+        `;
+    });
+}
+
+loadResults();
+
+setInterval(
+    loadResults,
+    5000
+);
+
+</script>
+
+</body>
+</html>
