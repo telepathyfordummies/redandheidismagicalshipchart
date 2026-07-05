@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Poll</title>
+<title>CHOOSE YOUR FAVORITE!!</title>
 
 <style>
 body{
@@ -91,7 +91,7 @@ h1{
 
 <body>
 
-<h1>Vote for Your Favorite</h1>
+<h1>Choose your favorite!</h1>
 
 <div id="voteStatus"></div>
 <div id="leader"></div>
@@ -99,7 +99,7 @@ h1{
 
 <div id="popup" class="popup">
     <p>Thanks for voting!</p>
-    <button onclick="window.location.href='nextpage.html'">Continue</button>
+    <button onclick="window.location.href='themagicalshipchartinquestion.html'">Continue</button>
     <button onclick="closePopup()">Stay Here</button>
 </div>
 
@@ -187,7 +187,7 @@ async function loadResults(){
 
         document.getElementById("leader").innerHTML =
             total > 0
-            ? `🏆 Leader: ${leader} (${((leaderVotes/total)*100).toFixed(1)}%)`
+            ? `Prom Royalty: ${leader} (${((leaderVotes/total)*100).toFixed(1)}%)`
             : "No votes yet";
 
         const voted = localStorage.getItem("alreadyVoted");
