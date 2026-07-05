@@ -42,23 +42,34 @@
       background: #555;
     }
 
-        #rainbow1 {
-  top: 100px;
-  left: 100px;
-  z-index: 11
+  .scene{
+    position:relative;
+    max-width:800px;
+    margin:auto;
+    padding:30px;
 }
+
+/* pngs  */
+.decor{
+    position:absolute;
+    width:80px;   /* adjust size */
+    height:auto;
+    pointer-events:none; /* so they don't block clicks */
+}
+
     
   </style>
 </head>
 <body>
-  <img id="rainbow1" src="rainbow1.png" alt=".">
+<div class="scene">
   <div id="box">
     <h2>What's the password?</h2>
     <input type="password" id="pw" placeholder="Password">
     <button onclick="check()">Submit</button>
     <p id="msg" style="color: red; margin-top: 0.5rem;"></p>
   </div>
-
+   <img src="rainbow1.png" class="decor" style="top:50px; left:80px;">
+</div>
   <script>
     function check() {
       const password = "NORMAL"; // <-- set password
