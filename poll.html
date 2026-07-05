@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -18,26 +17,26 @@ h1{
     text-align:center;
 }
 
-#leader{
-    text-align:center;
-    font-size:24px;
-    font-weight:bold;
-    margin:25px 0;
-}
-
 #voteStatus{
     text-align:center;
     margin-bottom:20px;
     font-weight:bold;
 }
 
+#leader{
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    margin:20px 0;
+}
+
 .candidate{
-    margin-bottom:15px;
-    cursor:pointer;
+    margin-bottom:12px;
     border:1px solid #ccc;
     border-radius:10px;
     padding:12px;
-    transition:background .2s;
+    cursor:pointer;
+    transition:0.2s;
 }
 
 .candidate:hover{
@@ -46,23 +45,20 @@ h1{
 
 .candidate.disabled{
     cursor:default;
-}
-
-.candidate.disabled:hover{
-    background:white;
+    opacity:0.85;
 }
 
 .candidate-header{
     display:flex;
     justify-content:space-between;
-    margin-bottom:8px;
     font-weight:bold;
+    margin-bottom:6px;
 }
 
 .bar-container{
     width:100%;
-    height:24px;
-    background:#e0e0e0;
+    height:22px;
+    background:#e6e6e6;
     border-radius:12px;
     overflow:hidden;
 }
@@ -71,7 +67,11 @@ h1{
     height:100%;
     background:#4caf50;
     width:0%;
-    transition:width .5s ease;
+    transition:width 0.4s ease;
+}
+
+.leader{
+    border:2px solid #4caf50;
 }
 
 .popup{
@@ -82,50 +82,31 @@ h1{
     transform:translate(-50%,-50%);
     background:white;
     border:2px solid black;
-    padding:25px;
+    padding:20px;
     text-align:center;
-    z-index:1000;
-}
-
-.popup button{
-    margin:5px;
-    padding:10px 20px;
+    z-index:999;
 }
 </style>
-
 </head>
 
 <body>
 
-<h1>Vote For Your Favorite</h1>
+<h1>Vote for Your Favorite</h1>
 
 <div id="voteStatus"></div>
-
 <div id="leader"></div>
-
 <div id="poll"></div>
 
 <div id="popup" class="popup">
-    <p>Thank you for voting!</p>
-
-```
-<button onclick="window.location.href='nextpage.html'">
-    Continue
-</button>
-
-<button onclick="closePopup()">
-    Stay Here
-</button>
-```
-
+    <p>Thanks for voting!</p>
+    <button onclick="window.location.href='nextpage.html'">Continue</button>
+    <button onclick="closePopup()">Stay Here</button>
 </div>
 
 <script>
 
-// REPLACE WITH YOUR WORKER URL
-const API_URL = "https://redandheidismagicalshipchart.telepathyfordummies.workers.dev";
+const API_URL = "https://YOUR-WORKER.workers.dev";
 
-// REPLACE THESE WITH YOUR 12 NAMES
 const candidates = [
     "Tweek/Craig",
     "Clyde/Kenny",
@@ -144,204 +125,124 @@ const candidates = [
     "Pete/Marj",
     "Pete/Henrietta",
     "Other"
-    
 ];
 
 async function vote(name){
 
-    if(localStorage.getItem("alreadyVoted")){
-        return;
-    }
+    if(localStorage.getItem("alreadyVoted")) return;
 
     try{
 
-        await fetch(
-            `${API_URL}/vote`,
-            {
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json"
-                },
-                body:JSON.stringify({
-                    vote:name
-                })
-            }
-        );
+        await fetch(`${API_URL}/vote`, {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({vote:name})
+        });
 
-        localStorage.setItem(
-            "alreadyVoted",
-            "true"
-        );
-
-        localStorage.setItem(
-            "votedFor",
-            name
-        );
+        localStorage.setItem("alreadyVoted","true");
+        localStorage.setItem("votedFor",name);
 
         await loadResults();
 
-        document.getElementById(
-            "popup"
-        ).style.display = "block";
+        document.getElementById("popup").style.display="block";
 
     }catch(err){
-
-        alert(
-            "Unable to submit vote."
-        );
-
+        alert("Vote failed. Check Worker.");
+        console.error(err);
     }
 }
 
 function closePopup(){
-
-    document.getElementById(
-        "popup"
-    ).style.display = "none";
+    document.getElementById("popup").style.display="none";
 }
 
 async function loadResults(){
 
-    const response =
-        await fetch(
-            `${API_URL}/results`
-        );
+    try{
 
-    const data =
-        await response.json();
+        const res = await fetch(`${API_URL}/results`);
 
-    let totalVotes = 0;
-
-    candidates.forEach(name => {
-        totalVotes += data[name] || 0;
-    });
-
-    let leaderName = "";
-    let leaderVotes = -1;
-
-    candidates.forEach(name => {
-
-        const votes =
-            data[name] || 0;
-
-        if(votes > leaderVotes){
-
-            leaderVotes = votes;
-            leaderName = name;
-        }
-    });
-
-    if(totalVotes > 0){
-
-        const leaderPercent =
-            (
-                leaderVotes /
-                totalVotes *
-                100
-            ).toFixed(1);
-
-        document.getElementById(
-            "leader"
-        ).innerHTML =
-        `🏆 Current Leader: ${leaderName} (${leaderPercent}%)`;
-
-    }else{
-
-        document.getElementById(
-            "leader"
-        ).innerHTML =
-        "No votes yet";
-    }
-
-    const poll =
-        document.getElementById(
-            "poll"
-        );
-
-    poll.innerHTML = "";
-
-    const alreadyVoted =
-        localStorage.getItem(
-            "alreadyVoted"
-        );
-
-    const votedFor =
-        localStorage.getItem(
-            "votedFor"
-        );
-
-    if(alreadyVoted){
-
-        document.getElementById(
-            "voteStatus"
-        ).innerHTML =
-        `✓ Your vote: ${votedFor}`;
-
-    }else{
-
-        document.getElementById(
-            "voteStatus"
-        ).innerHTML =
-        "Click a name to vote";
-    }
-
-    candidates.forEach(name => {
-
-        const votes =
-            data[name] || 0;
-
-        const percent =
-            totalVotes
-            ? (
-                votes /
-                totalVotes *
-                100
-            ).toFixed(1)
-            : "0.0";
-
-        const card =
-            document.createElement(
-                "div"
-            );
-
-        card.className =
-            alreadyVoted
-            ? "candidate disabled"
-            : "candidate";
-
-        if(!alreadyVoted){
-
-            card.onclick = () =>
-                vote(name);
+        if(!res.ok){
+            throw new Error("Worker error: " + res.status);
         }
 
-        card.innerHTML = `
-            <div class="candidate-header">
-                <span>${name}</span>
-                <span>${percent}%</span>
-            </div>
+        const data = await res.json();
 
-            <div class="bar-container">
-                <div
-                    class="bar"
-                    style="width:${percent}%"
-                ></div>
-            </div>
-        `;
+        let total = 0;
 
-        poll.appendChild(card);
-    });
+        candidates.forEach(n=>{
+            total += data[n] || 0;
+        });
+
+        let leader = "";
+        let leaderVotes = 0;
+
+        candidates.forEach(n=>{
+            const v = data[n] || 0;
+            if(v > leaderVotes){
+                leaderVotes = v;
+                leader = n;
+            }
+        });
+
+        document.getElementById("leader").innerHTML =
+            total > 0
+            ? `🏆 Leader: ${leader} (${((leaderVotes/total)*100).toFixed(1)}%)`
+            : "No votes yet";
+
+        const voted = localStorage.getItem("alreadyVoted");
+        const votedFor = localStorage.getItem("votedFor");
+
+        document.getElementById("voteStatus").innerHTML =
+            voted ? `✓ You voted for: ${votedFor}` : "Click a name to vote";
+
+        const poll = document.getElementById("poll");
+        poll.innerHTML = "";
+
+        candidates.forEach(name=>{
+
+            const votes = data[name] || 0;
+
+            const percent = total
+                ? ((votes/total)*100).toFixed(1)
+                : "0.0";
+
+            const div = document.createElement("div");
+
+            div.className = voted ? "candidate disabled" : "candidate";
+
+            if(!voted){
+                div.onclick = ()=>vote(name);
+            }
+
+            if(name === leader && total > 0){
+                div.classList.add("leader");
+            }
+
+            div.innerHTML = `
+                <div class="candidate-header">
+                    <span>${name}</span>
+                    <span>${percent}%</span>
+                </div>
+                <div class="bar-container">
+                    <div class="bar" style="width:${percent}%"></div>
+                </div>
+            `;
+
+            poll.appendChild(div);
+        });
+
+    }catch(err){
+        console.error("Load failed:", err);
+        document.getElementById("leader").innerHTML =
+            "Error loading results (check Worker /results)";
+    }
 }
 
 loadResults();
-
-setInterval(
-    loadResults,
-    5000
-);
+setInterval(loadResults, 5000);
 
 </script>
 
 </body>
 </html>
-
