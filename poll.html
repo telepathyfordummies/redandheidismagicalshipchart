@@ -1,53 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Poll</title>
-
-<style>
-body{
-    font-family:Arial,sans-serif;
-    text-align:center;
-    padding-top:100px;
-}
-
-button{
-    padding:12px 24px;
-    font-size:18px;
-    margin:10px;
-    cursor:pointer;
-}
-
-.popup{
-    display:none;
-    position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    background:white;
-    border:2px solid black;
-    padding:20px;
-    z-index:1000;
-}
-</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vote</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<h1>What is your favorite ship?</h1>
+<h1>What's your favorite ship?</h1>
 
-<button onclick="vote('yes')">Yes</button>
-<button onclick="vote('no')">No</button>
+<div class="poll-grid">
+
+<button onclick="vote('Alice')">Tweek/Craig</button>
+<button onclick="vote('Bob')">Clyde/Kenny</button>
+<button onclick="vote('Charlie')">Stan/Marj</button>
+<button onclick="vote('Diana')">Wendy/Tammy</button>
+
+<button onclick="vote('Edward')">Christophe/Rebecca</button>
+<button onclick="vote('Frank')">Damien/Brimmy</button>
+<button onclick="vote('Grace')">Kyle/Cartman/Bebe</button>
+<button onclick="vote('Henry')">Bebe/Wendy</button>
+
+<button onclick="vote('Ivy')">Kenny/Damien</button>
+<button onclick="vote('Jack')">Damien/Dovakien</button>
+<button onclick="vote('Kate')">Stan/Kyle</button>
+<button onclick="vote('Leo')">Stan/Tammy</button>
+
+<button onclick="vote('Ivy')">Clyde/Wendy</button>
+<button onclick="vote('Jack')">Pete/Michael</button>
+<button onclick="vote('Kate')">Pete/Marj</button>
+<button onclick="vote('Leo')">Pete/Henrietta</button>
+
+<button onclick="vote('Leo')">Other</button>
+
+</div>
 
 <div id="popup" class="popup">
     <p>Thank you for voting.</p>
+
     <button onclick="window.location.href='nextpage.html'">
         Continue
+    </button>
+
+    <button onclick="closePopup()">
+        Stay Here
     </button>
 </div>
 
 <script>
 
-async function vote(choice){
+const API_URL =
+"https://YOUR-WORKER.workers.dev";
+
+async function vote(name){
 
     if(localStorage.getItem("alreadyVoted")){
         alert("You have already voted.");
@@ -57,25 +64,40 @@ async function vote(choice){
     try{
 
         await fetch(
-            "https://YOUR-WORKER.workers.dev/vote",
+            `${API_URL}/vote`,
             {
                 method:"POST",
                 headers:{
                     "Content-Type":"application/json"
                 },
                 body:JSON.stringify({
-                    vote:choice
+                    vote:name
                 })
             }
         );
 
-        localStorage.setItem("alreadyVoted","true");
+        localStorage.setItem(
+            "alreadyVoted",
+            "true"
+        );
 
-        document.getElementById("popup").style.display="block";
+        document.getElementById(
+            "popup"
+        ).style.display = "block";
 
-    }catch(err){
-        alert("Error submitting vote.");
+    }catch(error){
+
+        alert(
+            "Unable to submit vote."
+        );
+
     }
+}
+
+function closePopup(){
+    document.getElementById(
+        "popup"
+    ).style.display = "none";
 }
 
 </script>
