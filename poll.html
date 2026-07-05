@@ -1,63 +1,155 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vote</title>
-<link rel="stylesheet" href="style.css">
+<title>Poll</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    max-width:800px;
+    margin:auto;
+    padding:30px;
+}
+
+h1{
+    text-align:center;
+}
+
+#leader{
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+    margin:25px 0;
+}
+
+#voteStatus{
+    text-align:center;
+    margin-bottom:20px;
+    font-weight:bold;
+}
+
+.candidate{
+    margin-bottom:15px;
+    cursor:pointer;
+    border:1px solid #ccc;
+    border-radius:10px;
+    padding:12px;
+    transition:background .2s;
+}
+
+.candidate:hover{
+    background:#f5f5f5;
+}
+
+.candidate.disabled{
+    cursor:default;
+}
+
+.candidate.disabled:hover{
+    background:white;
+}
+
+.candidate-header{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:8px;
+    font-weight:bold;
+}
+
+.bar-container{
+    width:100%;
+    height:24px;
+    background:#e0e0e0;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.bar{
+    height:100%;
+    background:#4caf50;
+    width:0%;
+    transition:width .5s ease;
+}
+
+.popup{
+    display:none;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    background:white;
+    border:2px solid black;
+    padding:25px;
+    text-align:center;
+    z-index:1000;
+}
+
+.popup button{
+    margin:5px;
+    padding:10px 20px;
+}
+</style>
+
 </head>
 
 <body>
 
-<h1>What's your favorite ship?</h1>
+<h1>Vote For Your Favorite</h1>
 
-<div class="poll-grid">
+<div id="voteStatus"></div>
 
-<button onclick="vote('Alice')">Tweek/Craig</button>
-<button onclick="vote('Bob')">Clyde/Kenny</button>
-<button onclick="vote('Charlie')">Stan/Marj</button>
-<button onclick="vote('Diana')">Wendy/Tammy</button>
+<div id="leader"></div>
 
-<button onclick="vote('Edward')">Christophe/Rebecca</button>
-<button onclick="vote('Frank')">Damien/Brimmy</button>
-<button onclick="vote('Grace')">Kyle/Cartman/Bebe</button>
-<button onclick="vote('Henry')">Bebe/Wendy</button>
-
-<button onclick="vote('Ivy')">Kenny/Damien</button>
-<button onclick="vote('Jack')">Damien/Dovakien</button>
-<button onclick="vote('Kate')">Stan/Kyle</button>
-<button onclick="vote('Leo')">Stan/Tammy</button>
-
-<button onclick="vote('Ivy')">Clyde/Wendy</button>
-<button onclick="vote('Jack')">Pete/Michael</button>
-<button onclick="vote('Kate')">Pete/Marj</button>
-<button onclick="vote('Leo')">Pete/Henrietta</button>
-
-<button onclick="vote('Leo')">Other</button>
-
-</div>
+<div id="poll"></div>
 
 <div id="popup" class="popup">
-    <p>Thank you for voting.</p>
+    <p>Thank you for voting!</p>
 
-    <button onclick="window.location.href='themagicalshipchartinquestion.html'">
-        Continue
-    </button>
+```
+<button onclick="window.location.href='nextpage.html'">
+    Continue
+</button>
 
-    <button onclick="closePopup()">
-        Stay Here
-    </button>
+<button onclick="closePopup()">
+    Stay Here
+</button>
+```
+
 </div>
 
 <script>
 
-const API_URL =
-"https://redandheidismagicalshipchart.telepathyfordummies.workers.dev/";
+// REPLACE WITH YOUR WORKER URL
+const API_URL = "https://YOUR-WORKER.workers.dev";
+
+// REPLACE THESE WITH YOUR 12 NAMES
+const candidates = [
+    "Tweek/Craig",
+    "Clyde/Kenny",
+    "Stan/Marj",
+    "Wendy/Tammy",
+    "Christophe/Rebecca",
+    "Damien/Brimmy",
+    "Kyle/Cartman/Bebe",
+    "Bebe/Wendy",
+    "Kenny/Damien",
+    "Damien/Dovakien",
+    "Stan/Kyle",
+    "Stan/Tammy",
+    "Clyde/Wendy",
+    "Pete/Michael",
+    "Pete/Marj",
+    "Pete/Henrietta",
+    "Other"
+    
+];
 
 async function vote(name){
 
     if(localStorage.getItem("alreadyVoted")){
-        alert("You have already voted.");
         return;
     }
 
@@ -81,11 +173,18 @@ async function vote(name){
             "true"
         );
 
+        localStorage.setItem(
+            "votedFor",
+            name
+        );
+
+        await loadResults();
+
         document.getElementById(
             "popup"
         ).style.display = "block";
 
-    }catch(error){
+    }catch(err){
 
         alert(
             "Unable to submit vote."
@@ -95,12 +194,154 @@ async function vote(name){
 }
 
 function closePopup(){
+
     document.getElementById(
         "popup"
     ).style.display = "none";
 }
 
+async function loadResults(){
+
+    const response =
+        await fetch(
+            `${API_URL}/results`
+        );
+
+    const data =
+        await response.json();
+
+    let totalVotes = 0;
+
+    candidates.forEach(name => {
+        totalVotes += data[name] || 0;
+    });
+
+    let leaderName = "";
+    let leaderVotes = -1;
+
+    candidates.forEach(name => {
+
+        const votes =
+            data[name] || 0;
+
+        if(votes > leaderVotes){
+
+            leaderVotes = votes;
+            leaderName = name;
+        }
+    });
+
+    if(totalVotes > 0){
+
+        const leaderPercent =
+            (
+                leaderVotes /
+                totalVotes *
+                100
+            ).toFixed(1);
+
+        document.getElementById(
+            "leader"
+        ).innerHTML =
+        `🏆 Current Leader: ${leaderName} (${leaderPercent}%)`;
+
+    }else{
+
+        document.getElementById(
+            "leader"
+        ).innerHTML =
+        "No votes yet";
+    }
+
+    const poll =
+        document.getElementById(
+            "poll"
+        );
+
+    poll.innerHTML = "";
+
+    const alreadyVoted =
+        localStorage.getItem(
+            "alreadyVoted"
+        );
+
+    const votedFor =
+        localStorage.getItem(
+            "votedFor"
+        );
+
+    if(alreadyVoted){
+
+        document.getElementById(
+            "voteStatus"
+        ).innerHTML =
+        `✓ Your vote: ${votedFor}`;
+
+    }else{
+
+        document.getElementById(
+            "voteStatus"
+        ).innerHTML =
+        "Click a name to vote";
+    }
+
+    candidates.forEach(name => {
+
+        const votes =
+            data[name] || 0;
+
+        const percent =
+            totalVotes
+            ? (
+                votes /
+                totalVotes *
+                100
+            ).toFixed(1)
+            : "0.0";
+
+        const card =
+            document.createElement(
+                "div"
+            );
+
+        card.className =
+            alreadyVoted
+            ? "candidate disabled"
+            : "candidate";
+
+        if(!alreadyVoted){
+
+            card.onclick = () =>
+                vote(name);
+        }
+
+        card.innerHTML = `
+            <div class="candidate-header">
+                <span>${name}</span>
+                <span>${percent}%</span>
+            </div>
+
+            <div class="bar-container">
+                <div
+                    class="bar"
+                    style="width:${percent}%"
+                ></div>
+            </div>
+        `;
+
+        poll.appendChild(card);
+    });
+}
+
+loadResults();
+
+setInterval(
+    loadResults,
+    5000
+);
+
 </script>
 
 </body>
 </html>
+
