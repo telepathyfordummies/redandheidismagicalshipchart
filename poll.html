@@ -274,7 +274,14 @@ async function loadResults(){
 }
 
 loadResults();
-setInterval(loadResults, 5000);
+
+setInterval(loadResults, 120000);
+
+document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) {
+        loadResults();
+    }
+});
 
 </script>
     
