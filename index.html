@@ -82,7 +82,7 @@
    
   <div id="box">
     <h2>What's the password?</h2>
-    <input type="password" id="pw" placeholder="Password">
+    <input type="password" id="pw" placeholder="password!!!">
     <button onclick="check()">Submit</button>
     <p id="msg" style="color: red; margin-top: 0.5rem;"></p>
   </div>
@@ -99,9 +99,9 @@
 
       if(input.toLowerCase() === password.toLowerCase()) {
         alert("Access granted!");
-        window.location.href = "poll.html"; // redirect to inside page
+        window.location.href = "poll.html"; // redirect to ship chart
       } else {
-        document.getElementById("msg").textContent = "Incorrect password.";
+        document.getElementById("msg").textContent = "Try again!";
       }
     }
   </script>
