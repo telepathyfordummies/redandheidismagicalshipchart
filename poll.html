@@ -102,7 +102,7 @@ h1{
     <button onclick="window.location.href='themagicalshipchartinquestion.html'">Continue</button>
     <button onclick="closePopup()">Stay Here</button>
 </div>
-
+    
 <script>
 
 const API_URL = "https://redandheidismagicalshipchart.telepathyfordummies.workers.dev";
@@ -127,33 +127,53 @@ const candidates = [
     "Other"
 ];
 
+//  24 hour check
+function canVote(){
+
+    const lastVote = localStorage.getItem("lastVoteTime");
+
+    if(!lastVote){
+        return true;
+    }
+
+    const now = Date.now();
+    const diff = now - Number(lastVote);
+
+    const oneDay = 24 * 60 * 60 * 1000;
+
+    return diff > oneDay;
+}
+
 async function vote(name){
 
-    if(localStorage.getItem("alreadyVoted")) return;
+    if(!canVote()){
+        alert("You can only vote once every 24 hours.");
+        return;
+    }
 
     try{
 
         await fetch(`${API_URL}/vote`, {
             method:"POST",
             headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({vote:name})
+            body:JSON.stringify({ vote:name })
         });
 
-        localStorage.setItem("alreadyVoted","true");
-        localStorage.setItem("votedFor",name);
+        localStorage.setItem("lastVoteTime", Date.now());
+        localStorage.setItem("votedFor", name);
 
         await loadResults();
 
-        document.getElementById("popup").style.display="block";
+        document.getElementById("popup").style.display = "block";
 
     }catch(err){
-        alert("Vote failed. Check Worker.");
+        alert("Vote failed.");
         console.error(err);
     }
 }
 
 function closePopup(){
-    document.getElementById("popup").style.display="none";
+    document.getElementById("popup").style.display = "none";
 }
 
 async function loadResults(){
@@ -162,9 +182,7 @@ async function loadResults(){
 
         const res = await fetch(`${API_URL}/results`);
 
-        if(!res.ok){
-            throw new Error("Worker error: " + res.status);
-        }
+        if(!res.ok) throw new Error(res.status);
 
         const data = await res.json();
 
@@ -187,14 +205,15 @@ async function loadResults(){
 
         document.getElementById("leader").innerHTML =
             total > 0
-            ? `Prom Royalty: ${leader} (${((leaderVotes/total)*100).toFixed(1)}%)`
+            ? `🏆 Leader: ${leader} (${((leaderVotes/total)*100).toFixed(1)}%)`
             : "No votes yet";
 
-        const voted = localStorage.getItem("alreadyVoted");
         const votedFor = localStorage.getItem("votedFor");
 
         document.getElementById("voteStatus").innerHTML =
-            voted ? `You voted for: ${votedFor}` : "Click a name to vote";
+            canVote()
+            ? "Click a name to vote"
+            : `✓ You voted for: ${votedFor}`;
 
         const poll = document.getElementById("poll");
         poll.innerHTML = "";
@@ -209,14 +228,12 @@ async function loadResults(){
 
             const div = document.createElement("div");
 
-            div.className = voted ? "candidate disabled" : "candidate";
+            const locked = !canVote();
 
-            if(!voted){
-                div.onclick = ()=>vote(name);
-            }
+            div.className = locked ? "candidate disabled" : "candidate";
 
-            if(name === leader && total > 0){
-                div.classList.add("leader");
+            if(!locked){
+                div.onclick = () => vote(name);
             }
 
             div.innerHTML = `
@@ -224,6 +241,7 @@ async function loadResults(){
                     <span>${name}</span>
                     <span>${percent}%</span>
                 </div>
+
                 <div class="bar-container">
                     <div class="bar" style="width:${percent}%"></div>
                 </div>
@@ -233,9 +251,9 @@ async function loadResults(){
         });
 
     }catch(err){
-        console.error("Load failed:", err);
+        console.error(err);
         document.getElementById("leader").innerHTML =
-            "Error loading results (check Worker /results)";
+            "Error loading results (check Worker)";
     }
 }
 
